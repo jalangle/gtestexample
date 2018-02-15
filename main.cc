@@ -1,7 +1,10 @@
-#include <iostream>
+#include <gtest/gtest.h>
 
-int main()
-{
-	std::cout << "Hello, World!" << std::endl;
-	return 0;
+
+TEST(ExampleTest, Successs) {
+	EXPECT_EQ(0, 0);
+}
+
+TEST(ExampleTest, Failure) {
+	EXPECT_EQ(0, 1);
 }
