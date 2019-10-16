@@ -32,7 +32,8 @@ endif()
 
 if (BUILD_BENCHMARKS)
 
-    set(BENCHMARK_ENABLE_TESTING OFF)
+    option(BENCHMARK_ENABLE_TESTING "" OFF)
+    option(BENCHMARK_ENABLE_GTEST_TESTS "" OFF)
     download_project(PROJ                googlebench
                      GIT_REPOSITORY      https://github.com/google/benchmark
                      GIT_TAG             master
