@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.9)
 
 project("Example Setup")
 
+include(CTest)
+
 include(cmake/DownloadProject.cmake)
 
 option(BUILD_TESTS "Build test runner" ON)
