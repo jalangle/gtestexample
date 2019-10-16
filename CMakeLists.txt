@@ -2,58 +2,44 @@ cmake_minimum_required(VERSION 3.10)
 
 project("Example Setup")
 
+include(cmake/DownloadProject.cmake)
+
 option(BUILD_TESTS "Build test runner" ON)
 option(BUILD_BENCHMARKS "Micro benchmarks" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+
 add_library(example-library ${CMAKE_CURRENT_SOURCE_DIR}/src/library.cpp)
 
 if (BUILD_TESTS)
-    configure_file(cmake/GoogleTest.cmake googletest-download/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-    endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
+    download_project(PROJ                googletest
+                     GIT_REPOSITORY      https://github.com/google/googletest.git
+                     GIT_TAG             master
+                     ${UPDATE_DISCONNECTED_IF_AVAILABLE}
+    )
 
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-                     EXCLUDE_FROM_ALL)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
 
     add_executable(example-test test/main.cpp test/test.cpp)
     target_link_libraries(example-test example-library)
     target_link_libraries(example-test gtest_main)
+    add_test(NAME example_test COMMAND example-test)
 endif()
 
 if (BUILD_BENCHMARKS)
-    configure_file(cmake/GoogleBench.cmake googlebench-download/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebench-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googlebench failed: ${result}")
-    endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebench-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googlebench failed: ${result}")
-    endif()
 
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googlebench-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/googlebench-build
-                     EXCLUDE_FROM_ALL)
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    download_project(PROJ                googlebench
+                     GIT_REPOSITORY      https://github.com/google/benchmark
+                     GIT_TAG             master
+                     ${UPDATE_DISCONNECTED_IF_AVAILABLE}
+    )
+
+    add_subdirectory(${googlebench_SOURCE_DIR} ${googlebench_BINARY_DIR})
 
     add_executable(example-bench benchmarks/main.cpp)
     target_link_libraries(example-bench benchmark)
